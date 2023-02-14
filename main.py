@@ -171,7 +171,7 @@ from tensorflow.keras.models import load_model
 bot =load_model(os.path.join('models', 'AceOrShanksBotV1.h5'))
 
 # get an image then resize it to the right dimensions then have the model predict on that input 
-image = cv2.cvtColor(cv2.imread(os.path.join('data','ace', '1_1.jpg')),cv2.COLOR_BGR2RGB)
+image = cv2.cvtColor(cv2.imread(os.path.join('data','shanks', 'shanksarrives.jpg')),cv2.COLOR_BGR2RGB)
 
 resizedImage = tf.image.resize(image, (256,256))
 resizedImage = resizedImage.numpy().astype(int) # change it to a numpy array of ints 
