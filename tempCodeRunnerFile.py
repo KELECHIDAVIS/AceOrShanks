@@ -1,1 +1,1 @@
- 
+plt.colorbar()

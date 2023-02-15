@@ -5,6 +5,7 @@ import numpy as np
 import tensorflow as tf 
 import cv2 
 import os 
+import random 
 import imghdr
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, MaxPooling2D
@@ -13,7 +14,7 @@ from tensorflow.keras.models import load_model
 
 
 
-
+labelNames = ['Ace', 'Shanks' ]
 # #load data 
 # # want to load the data into a tensorflow pipeline to more efficiently load and access our data on the fly 
 # dataDirectory = 'data'
@@ -170,24 +171,68 @@ from tensorflow.keras.models import load_model
 
 bot =load_model(os.path.join('models', 'AceOrShanksBotV1.h5'))
 
-# get an image then resize it to the right dimensions then have the model predict on that input 
-image = cv2.cvtColor(cv2.imread(os.path.join('data','shanks', 'shanksarrives.jpg')),cv2.COLOR_BGR2RGB)
+# # get an image then resize it to the right dimensions then have the model predict on that input 
+# image = cv2.cvtColor(cv2.imread(os.path.join('data','shanks', 'shanksarrives.jpg')),cv2.COLOR_BGR2RGB)
 
-resizedImage = tf.image.resize(image, (256,256))
-resizedImage = resizedImage.numpy().astype(int) # change it to a numpy array of ints 
-
-
-plt.imshow(resizedImage)
-plt.show(); 
+# resizedImage = tf.image.resize(image, (256,256))
+# resizedImage = resizedImage.numpy().astype(int) # change it to a numpy array of ints 
 
 
-resizedImage = np.expand_dims(resizedImage / 255,0) #normalize image 
+# plt.imshow(resizedImage)
+# plt.show(); 
+
+
+# resizedImage = np.expand_dims(resizedImage / 255,0) #normalize image 
 
 
 
-prediction = bot.predict(resizedImage)
-print("Prediction Value: ", prediction)
-if prediction >.5: 
-    print("I am looking at shanks")
-else: 
-    print("I am looking at ace ")
+# prediction = bot.predict(resizedImage)
+# print("Prediction Value: ", prediction)
+# if prediction >.5: 
+#     print("I am looking at shanks")
+# else: 
+#     print("I am looking at ace ")
+
+
+
+dataDirectory= 'testData'
+validImageExtensions = ['jpg', 'png', 'jpeg', 'bmp']
+# for folder in os.listdir(dataDirectory):   # for each folder in data directory
+#     for image in os.listdir(os.path.join(dataDirectory , folder )):  #for each image in the folder 
+#         imagePath = os.path.join(dataDirectory, folder , image)
+#         try : 
+#             img = cv2.imread(imagePath) #read in the image ; if opencv cannot read in the image then it will throw an error 
+#             extension = imghdr.what(imagePath )
+#             if extension not in validImageExtensions: 
+#                 #not a valid extension 
+#                 print("Image is not a valid format {}".format(imagePath))
+#                 os.remove(imagePath)    
+#         except Exception as e : 
+#             print("there is an issue with this image {}".format(imagePath))
+data= tf.keras.utils.image_dataset_from_directory('testData')
+scaledData = data.map(lambda x,y: (x/255,y)) 
+testDataSize = int(len(scaledData)*.7); 
+testData = scaledData.take(testDataSize)
+batch = scaledData.as_numpy_iterator().next()
+
+fig = plt.figure(figsize = (10, 7))
+
+#setting values to rows and column 
+numCols = 4 
+numRows = 3 
+
+for i in range(numCols*numRows): 
+    fig.add_subplot(numRows , numCols , i+1)
+    plt.imshow(batch[0][i]) #shows the image 
+    plt.axis('off')
+    resized = tf.image.resize(batch[0][i], (256,256)) #resizes 
+    expanded = np.expand_dims(resized,0) #expands
+    prediction = bot.predict(expanded)
+    prediction  = round(prediction.max()) #makes the prediction a scalar value 
+    
+    
+    
+    plt.title("Actual: {}\nPredicted: {}  ".format(labelNames[batch[1][i].max()], labelNames[prediction]))
+
+
+plt.show()
