@@ -215,11 +215,12 @@ testDataSize = int(len(scaledData)*.7);
 testData = scaledData.take(testDataSize)
 batch = scaledData.as_numpy_iterator().next()
 
-fig = plt.figure(figsize = (10, 7))
+fig = plt.figure(figsize = (15, 9))
 
 #setting values to rows and column 
 numCols = 4 
 numRows = 3 
+count =0 
 
 for i in range(numCols*numRows): 
     fig.add_subplot(numRows , numCols , i+1)
@@ -230,9 +231,18 @@ for i in range(numCols*numRows):
     prediction = bot.predict(expanded)
     prediction  = round(prediction.max()) #makes the prediction a scalar value 
     
-    
-    
-    plt.title("Actual: {}\nPredicted: {}  ".format(labelNames[batch[1][i].max()], labelNames[prediction]))
+    actual = labelNames[batch[1][i].max()]
+    guess =labelNames[prediction]
+    clr =''
+    if(guess == actual ): 
+        clr = 'green'  
+        count +=1 
+    else: 
+        clr = 'red'
 
+
+    plt.title("{} (Predicted {})  ".format(actual ,guess ), color=clr, weight ='bold')
+
+fig.suptitle("Ai Was {}% right".format(round(count*100 /(numCols*numRows))), fontsize=20)
 
 plt.show()
